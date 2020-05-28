@@ -74,6 +74,8 @@ public class ArtistActivity extends AppCompatActivity {
     private Uri filePath;
     //firebase objects
     private StorageReference storageReference;
+    private String urlImage;
+    private StorageReference sRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -312,7 +314,7 @@ public class ArtistActivity extends AppCompatActivity {
             progressDialog.show();
 
             //getting the storage reference
-            StorageReference sRef = storageReference.child(Constants.STORAGE_PATH_UPLOADS + System.currentTimeMillis() + "." + getFileExtension(filePath));
+            sRef = storageReference.child(Constants.STORAGE_PATH_UPLOADS + System.currentTimeMillis() + "." + getFileExtension(filePath));
 
             //adding the file to reference
             sRef.putFile(filePath)
@@ -327,8 +329,22 @@ public class ArtistActivity extends AppCompatActivity {
 
                             //creating the upload object to store uploaded image details
                             //Upload upload = new Upload(, taskSnapshot.getDownloadUrl().toString());
-                            String urlImage= taskSnapshot.getStorage().getDownloadUrl().toString();//Objects.requireNonNull(Objects.requireNonNull(taskSnapshot.getMetadata()).getReference()).getDownloadUrl().toString();
-                            Log.d("URL For Image",urlImage); //TODO get the correct URl for image
+                            urlImage= "none";//taskSnapshot.getStorage().getDownloadUrl().toString();//Objects.requireNonNull(Objects.requireNonNull(taskSnapshot.getMetadata()).getReference()).getDownloadUrl().toString();
+                            sRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    urlImage=uri.toString();
+                                    //addOngoing(urlImage); // add the data to filebase
+
+                                }
+                            });
+                            sRef.getDownloadUrl().addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(getBaseContext(),"Unable to add",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            Log.d("URL For Image",urlImage); //DONE got the correct URL
                             //adding an upload to firebase database
                             //String uploadId = mDatabase.push().getKey();
                             //mDatabase.child(uploadId).setValue(upload);
